@@ -1,0 +1,20 @@
+{
+  "name": "hola-client",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@legendapp/state": "^3.0.0-beta.43",
+    "@socket.io/bun-engine": "^0.1.0",
+    "jose": "^6.1.3",
+    "moment": "^2.30.1",
+    "socket-session-manager": "^0.0.1",
+    "uuid": "^13.0.0"
+  }
+}
