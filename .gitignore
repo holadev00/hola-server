@@ -34,3 +34,5 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 apps/hola-client/files/**
 !apps/hola-client/files/.gitkeep
+
+hola.log
