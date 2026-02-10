@@ -14,6 +14,7 @@ const username = Joi
     .string()
     .min(3)
     .max(30)
+    .trim()
     .pattern(/^[a-zA-Z0-9_.-]+$/);
 
 /**
@@ -48,7 +49,7 @@ export const password = loginPassword
         'string.empty': 'Mot de passe requis',
         'string.min': 'Mot de passe trop court (8 caractères minimum)',
         'string.max': 'Mot de passe trop long (255 caractères maximum)',
-        'string.pattern': 'Le mot de passe doit contenir au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère special',
+        'string.pattern.base': 'Le mot de passe doit contenir au moins une lettre majuscule, une lettre minuscule, un chiffre et un caractère special',
         'any.required': 'Mot de passe requis',
     });
 
@@ -56,6 +57,13 @@ export const schemas = {
     login: Joi.object({
         identifiant,
         password: loginPassword,
+    }),
+    signup: Joi.object({
+        username,
+        email,
+        phone,
+        password,
+        password_confirm: password,
     }),
 };
 

@@ -44,8 +44,92 @@ export default async (socket, id, daysFromNow, settings: Settings, cb) => {
         }
     }
 
+    const lookupPricing = {
+        $lookup: {
+            from: "courtpricings",
+            let: {
+                courtId: "$_id",
+                slotStart: "$slotStart",
+                slotEnd: "$slotEnd",
+                weekDay,
+                date: "$schedule.date"
+            },
+            pipeline: [
+                {
+                    $match: {
+                        $expr: {
+                            $and: [
+                                { $in: ["$$courtId", "$courts"] },
+                                { $eq: ["$active", true] },
+
+                                // jour de semaine
+                                {
+                                    $or: [
+                                        // pricing valable tous les jours
+                                        { $not: ["$dayOfWeek"] },
+
+                                        // jour précis match
+                                        { $in: ["$$weekDay", "$dayOfWeek"] },
+                                    ]
+                                },
+
+                                // heure du slot
+                                { $lte: [{ $multiply: ["$startHour", 60] }, "$$slotStart"] },
+                                { $gte: [{ $multiply: ["$endHour", 60] }, "$$slotEnd"] },
+
+                                // validité temporelle
+                                {
+                                    $or: [
+                                        { $not: ["$validFrom"] },
+                                        { $lte: ["$validFrom", "$$date"] }
+                                    ]
+                                },
+                                {
+                                    $or: [
+                                        { $not: ["$validTo"] },
+                                        { $gte: ["$validTo", "$$date"] }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+
+                // priorité PREMIUM > PEAK
+                {
+                    $addFields: {
+                        priority: {
+                            $cond: [
+                                { $eq: ["$type", "PREMIUM"] }, 2, 1
+                            ]
+                        }
+                    }
+                },
+
+                { $sort: { priority: -1 } },
+                { $limit: 1 }
+            ],
+            as: "slotPricing"
+        }
+    };
+
     const availabilities = await Courts.aggregate([
         findCourts,
+
+        {
+            $lookup: {
+                from: "venues",
+                localField: "venue",
+                foreignField: "_id",
+                as: "venueData"
+            }
+        },
+        { $unwind: "$venueData" },
+        {
+            $addFields: {
+                courtVenuePricing: "$venueData.pricing"
+            }
+        },
 
         {
             $lookup: {
@@ -118,9 +202,21 @@ export default async (socket, id, daysFromNow, settings: Settings, cb) => {
             $addFields: {
                 hours: {
                     $range: [
-                        { $multiply: ["$schedule.start", 60] },
-                        { $multiply: ["$schedule.end", 60] },
-                        { $multiply: ["$schedule.interval", 60] }
+                        {
+                            $multiply: [{
+                                $ifNull: ["$schedule.start", 0]
+                            }, 60]
+                        },
+                        {
+                            $multiply: [{
+                                $ifNull: ["$schedule.end", 24]
+                            }, 60]
+                        },
+                        {
+                            $multiply: [{
+                                $ifNull: ["$schedule.interval", 1]
+                            }, 60]
+                        }
                     ]
                 }
             }
@@ -136,6 +232,20 @@ export default async (socket, id, daysFromNow, settings: Settings, cb) => {
             $addFields: {
                 slotStart: "$hours",
                 slotEnd: { $add: ["$hours", { $multiply: ["$schedule.slots", 60] }] },
+            }
+        },
+
+        lookupPricing,
+
+        {
+            $addFields: {
+                pricePerPlayerPerHour: {
+                    $ifNull: [
+                        { $arrayElemAt: ["$slotPricing.pricePerPlayerPerHour", 0] },
+                        "$venueData.pricing.defaultPricePerPlayerPerHour"
+                    ]
+                },
+                currency: "$venueData.pricing.currency"
             }
         },
 
@@ -198,11 +308,19 @@ export default async (socket, id, daysFromNow, settings: Settings, cb) => {
                     sport: "$court.sport",
                     indoor: "$court.indoor",
                     filmed: "$court.filmed",
-                    venue: "$court.venue"
+                    venue: "$court.venue",
                 },
                 start: "$slotStart",
                 end: "$slotEnd",
-                slot: "$schedule.slots"
+                slot: "$schedule.slots",
+                pricePerPlayerPerHour: 1,
+                priceTotal: {
+                    $multiply: [
+                        "$pricePerPlayerPerHour",
+                        { $divide: [{ $subtract: ["$slotEnd", "$slotStart"] }, 60] }
+                    ]
+                },
+                currency: 1,
             }
         },
 
@@ -214,7 +332,6 @@ export default async (socket, id, daysFromNow, settings: Settings, cb) => {
 
     ]);
 
-    //console.log(availabilities);
     cb(availabilities);
     return availabilities;
 }

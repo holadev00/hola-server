@@ -5,11 +5,21 @@ export const ScheduleSchema = new mongoose.Schema(
         venue: { type: mongoose.Schema.Types.ObjectId, ref: "Venue", required: true },
         // 0 = dimanche, 6 = samedi (ISO simple)
         weekDay: {
-            type: Number,
-            min: 0,
-            max: 6,
+            type: mongoose.Schema.Types.Mixed,
             required: function () {
                 return !this.date;
+            },
+            validate: {
+                validator: function (v) {
+                    if (typeof v === "number") {
+                        return v >= 0 && v <= 6;
+                    }
+                    if (typeof v === "string") {
+                        return ["0", "1", "2", "3", "4", "5", "6", "*"].includes(v);
+                    }
+                    return false;
+                },
+                message: "weekDay must be a number (0–6) or a numeric string"
             }
         },
 

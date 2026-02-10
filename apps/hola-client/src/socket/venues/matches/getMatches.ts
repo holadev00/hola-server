@@ -3,138 +3,163 @@ import { Matches } from "../../../models/Venues/Matches";
 
 export async function getMatches({ venue, match, clientId, userId }: any) {
     console.log("getMatches", venue, match, clientId, userId);
-    return Matches.aggregate(
-        [
-            {
-                $match: {
-                    $and: [
+
+    const retrieveNextMatches = {
+        $match: {
+            $and: [
+                {
+                    ...(match && { _id: new mongoose.Types.ObjectId(match) }),
+                    $or: [
+                        { private: false },
+                        { private: { $exists: false } },
                         {
-                            ...(match && { _id: new mongoose.Types.ObjectId(match) }),
-                            $or: [
-                                { private: false },
-                                { private: { $exists: false } },
-                                {
-                                    private: true,
-                                    "createdBy.client": new mongoose.Types.ObjectId(clientId),
-                                    "createdBy.user": new mongoose.Types.ObjectId(userId),
-                                },
-                            ]
+                            private: true,
+                            "createdBy.client": new mongoose.Types.ObjectId(clientId),
+                            "createdBy.user": new mongoose.Types.ObjectId(userId),
                         },
-                        {
-                            active: true,
-                            date: { $gte: new Date().toISOString().slice(0, 10) }
-                        }
                     ]
                 },
-            },
-
-            /* ---------- Court ---------- */
-            {
-                $lookup: {
-                    from: "courts",
-                    localField: "court",
-                    foreignField: "_id",
-                    as: "court",
+                {
+                    active: true,
+                    //date: { $gte: new Date().toISOString().slice(0, 10) }
                 },
-            },
-            { $unwind: "$court" },
-            {
-                $addFields: {
-                    court: {
-                        name: "$court.name",
-                        indoor: "$court.indoor",
-                        filmed: "$court.filmed",
-                        sport: "$court.sport",
-                    },
-                }
-            },
-
-            /* ---------- Court Images ---------- */
-
-            ...(venue
-                ? [
-                    {
-                        $match: {
-                            "court.venue": new mongoose.Types.ObjectId(venue),
-                        },
-
-                    },
-                ]
-                : []),
-
-            /* ---------- Venue ---------- */
-            {
-                $lookup: {
-                    from: "venues",
-                    localField: "court.venue",
-                    foreignField: "_id",
-                    as: "venue",
-                },
-            },
-            { $unwind: "$venue" },
-
-            /* ---------- Venue Location ---------- */
-            {
-                $lookup: {
-                    from: "locations",
-                    localField: "venue._id",
-                    foreignField: "venue",
-                    as: "location",
-                },
-            },
-            { $unwind: "$location" },
-
-            {
-                $addFields: {
-                    location: "$location.location",
-                }
-            },
-
-            /* ---------- Venues Images ---------- */
-            {
-                $lookup: {
-                    from: "images",
-                    localField: "venue._id",
-                    foreignField: "venue",
-                    as: "venue.images",
-                },
-            },
-
-            /* ---------- CreatedBy ---------- */
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "createdBy.user",
-                    foreignField: "_id",
-                    as: "createdBy.user",
-                },
-            },
-            { $unwind: "$createdBy.user" },
-
-            {
-                $lookup: {
-                    from: "clients",
-                    localField: "createdBy.client",
-                    foreignField: "_id",
-                    as: "createdBy.client",
-                },
-            },
-            { $unwind: "$createdBy.client" },
-
-            {
-                $addFields: {
-                    "createdBy.self": {
-                        $and: [
+                {
+                    $expr: {
+                        $gte: [
                             {
-                                $eq: ["$createdBy.user._id", new mongoose.Types.ObjectId(userId)],
+                                $dateFromString: {
+                                    dateString: "$date",
+                                    format: "%Y-%m-%d"
+                                }
                             },
-                            {
-                                $eq: ["$createdBy.client._id", new mongoose.Types.ObjectId(clientId)],
-                            },
-                        ],
+                            "$$NOW"
+                        ]
                     }
                 }
+            ]
+        },
+    };
+
+    const lookupAndAddCourt = [{
+        $lookup: {
+            from: "courts",
+            localField: "court",
+            foreignField: "_id",
+            as: "court",
+        },
+    },
+    { $unwind: "$court" },
+    {
+        $addFields: {
+            court: {
+                name: "$court.name",
+                indoor: "$court.indoor",
+                filmed: "$court.filmed",
+                sport: "$court.sport",
             },
+        }
+    }];
+
+
+    const lookupCourtImages = venue
+        ? [
+            {
+                $match: {
+                    "court.venue": new mongoose.Types.ObjectId(venue),
+                },
+            },
+        ]
+        : [];
+
+    const retrieveVenue = [
+        {
+            $lookup: {
+                from: "venues",
+                localField: "court.venue",
+                foreignField: "_id",
+                as: "venue",
+            },
+        },
+        { $unwind: "$venue" },
+        {
+            $lookup: {
+                from: "locations",
+                localField: "venue._id",
+                foreignField: "venue",
+                as: "location",
+            },
+        },
+        { $unwind: "$location" },
+
+        {
+            $addFields: {
+                location: "$location.location",
+            }
+        },
+        {
+            $lookup: {
+                from: "images",
+                localField: "venue._id",
+                foreignField: "venue",
+                as: "venue.images",
+            },
+        }
+    ];
+
+    const lookupCreatedBy = [
+        {
+            $lookup: {
+                from: "users",
+                localField: "createdBy.user",
+                foreignField: "_id",
+                as: "createdBy.user",
+            },
+        },
+        { $unwind: "$createdBy.user" },
+
+        {
+            $lookup: {
+                from: "clients",
+                localField: "createdBy.client",
+                foreignField: "_id",
+                as: "createdBy.client",
+            },
+        },
+        { $unwind: "$createdBy.client" },
+
+        {
+            $addFields: {
+                "createdBy.self": {
+                    $and: [
+                        {
+                            $eq: ["$createdBy.user._id", new mongoose.Types.ObjectId(userId)],
+                        },
+                        {
+                            $eq: ["$createdBy.client._id", new mongoose.Types.ObjectId(clientId)],
+                        },
+                    ],
+                }
+            }
+        }
+    ];
+
+    console.log(
+        await Matches.aggregate([
+            retrieveNextMatches,
+            ...lookupAndAddCourt,
+            ...lookupCourtImages,
+            ...retrieveVenue,
+            ...lookupCreatedBy
+        ])
+    );
+
+    return Matches.aggregate(
+        [
+            retrieveNextMatches,
+            ...lookupAndAddCourt,
+            ...lookupCourtImages,
+            ...retrieveVenue,
+            ...lookupCreatedBy,
 
             /* ---------- Participations ---------- */
             {

@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import { Sessions } from "../../../models";
 
-export const _bindUserToClient = async (s) => {
+export const _bindUserToClient = async (s, user) => {
     const criteria = {
         client: new mongoose.Types.ObjectId(s.session?.client),
-        user: new mongoose.Types.ObjectId(s.session?.currentUser.get())
+        user: new mongoose.Types.ObjectId(user._id)
     };
 
     const set = { active: true };

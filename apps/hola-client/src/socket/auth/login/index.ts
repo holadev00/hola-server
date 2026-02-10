@@ -11,9 +11,9 @@ export const login = async (socket: Socket, form: LoginForm, cb: Function) => {
         const validatedData = await _validateForm(form);
         const user = await _checkUser(validatedData);
         await _checkPassword(user, validatedData);
-        await _bindUserToClient(socket);
+        await _bindUserToClient(socket, user);
         cb({ success: true });
     } catch (err) {
-        cb(err);
+        cb({ success: false, error: err });
     }
 };
