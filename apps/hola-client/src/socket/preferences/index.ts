@@ -24,7 +24,7 @@ export function bind(socket) {
 
     async function getPreferences() {
         const clientId = new mongoose.Types.ObjectId(socket.session.client);
-        const userId = (socket.session.currentUser?.get() || typeof socket.session.currentUser.get() === "string")
+        const userId = (socket.session.currentUser?.get() && typeof socket.session.currentUser.get() === "string")
             ? new mongoose.Types.ObjectId(socket.session.currentUser.get())
             : null;
 
