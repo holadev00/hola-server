@@ -15,7 +15,7 @@ const { websocket } = engine.handler();
 const distDir = path.join(__dirname, "../../dist");
 
 export const server: Serve.Options<any> = {
-    port: 80,
+    port: process.env.PORT || 3000,
     idleTimeout: 30,
 
     development: {
@@ -50,7 +50,7 @@ export const server: Serve.Options<any> = {
             }
 
             // mapping direct du path
-            let filePath = path.join(distDir, '.'+url.pathname);
+            let filePath = path.join(distDir, '.' + url.pathname);
 
             if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
                 filePath = path.join(filePath, "index.html");
