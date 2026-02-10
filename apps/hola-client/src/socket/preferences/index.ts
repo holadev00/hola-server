@@ -12,7 +12,7 @@ export function bind(socket) {
 
     const userUpdate = event();
 
-    console.log('bind', !!socket.session.currentUser.get(), typeof socket.session.currentUser.get() === "string", socket.session.currentUser.get(), socket.session.client);
+    //console.log('bind', !!socket.session.currentUser.get(), typeof socket.session.currentUser.get() === "string", socket.session.currentUser.get(), socket.session.client);
     const userCriteria = (!!socket.session.currentUser.get() && typeof socket.session.currentUser.get() === "string") ? {
         $or: [
             { user: new mongoose.Types.ObjectId(socket.session.currentUser.get()) },
@@ -24,7 +24,7 @@ export function bind(socket) {
 
     async function getPreferences() {
         const clientId = new mongoose.Types.ObjectId(socket.session.client);
-        const userId = socket.session.currentUser?.get
+        const userId = (socket.session.currentUser?.get() || typeof socket.session.currentUser.get() === "string")
             ? new mongoose.Types.ObjectId(socket.session.currentUser.get())
             : null;
 
