@@ -12,7 +12,7 @@ export function bind(socket) {
 
     const userUpdate = event();
 
-    const userCriteria = (socket.session.currentUser.get()) && {
+    const userCriteria = (!!socket.session.currentUser.get()) && {
         $or: [
             { user: new mongoose.Types.ObjectId(socket.session.currentUser.get()) },
             { client: new mongoose.Types.ObjectId(socket.session.client) }
