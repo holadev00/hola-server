@@ -20,6 +20,7 @@
   "dependencies": {
     "@aashari/nodejs-geocoding": "^2.7.2",
     "@hono/node-server": "^1.19.7",
+    "@legendapp/state": "^3.0.0-beta.43",
     "@socket.io/bun-engine": "^0.1.0",
     "@types/bcrypt": "^6.0.0",
     "@types/mime-types": "^3.0.1",
