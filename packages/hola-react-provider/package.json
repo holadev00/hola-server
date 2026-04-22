@@ -1,0 +1,14 @@
+{
+  "name": "@hola/react-provider",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@chadt.ana/expo": "https://github.com/nakschadiii/chadt.ana-expo.git"
+  }
+}

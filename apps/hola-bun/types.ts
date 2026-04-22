@@ -1,0 +1,1 @@
+export interface Session { client: string; user: string; current: { user: string } }
