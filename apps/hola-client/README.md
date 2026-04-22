@@ -1,4 +1,4 @@
-# @hola
+# hola-client
 
 To install dependencies:
 
