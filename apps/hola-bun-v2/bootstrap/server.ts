@@ -2,7 +2,7 @@ import { Server as Engine } from "@socket.io/bun-engine";
 import { serve } from "bun";
 import { Server } from "socket.io";
 import { join } from "path";
-import type { AuthServicePort } from "../domain/ports/AuthServicePort";
+import type { AuthServicePort } from "../domain/ports/auth/AuthServicePort";
 
 export function createServer(authService: AuthServicePort) {
     const io = new Server({
