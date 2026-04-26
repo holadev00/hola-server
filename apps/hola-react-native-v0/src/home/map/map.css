@@ -1,0 +1,102 @@
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+body {
+    --size: 35px;
+    --cSize: 12px;
+}
+
+.pin.new {
+    background: #fff;
+    --animation: fadeIn 0.5s ease-in-out 0s 1 normal none;
+}
+
+.pin {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background-color: #0000;
+}
+
+.pin::before {
+    content: "";
+    width: var(--size);
+    height: var(--size);
+    aspect-ratio: 1 !important;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    transform-origin: center;
+    transform: translate(0%, -60%);
+}
+
+.pin::after {
+    display: block;
+    height: calc(var(--size) / 2);
+    aspect-ratio: 1;
+    position: absolute;
+    transform-origin: 50% 50%;
+    transform: translate(0%, -50%) rotate(45deg);
+    content: "";
+    font-weight: bold;
+}
+
+.pin::before,
+.pin::after {
+    background-color: #0000;
+    --animation: fadeIn 0.5s ease-in-out 0s 1 normal none;
+}
+
+.pin .icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+}
+
+.pin.blue::before,
+.pin.blue::after {
+    background-color: dodgerblue;
+}
+
+.pin.orange::before,
+.pin.orange::after {
+    background-color: #FF5A1F;
+}
+
+.favorite {
+    position: absolute;
+    height: var(--size);
+    width: var(--size);
+    border-radius: 50%;
+    transform-origin: center;
+    transform: translate(0%, -50%);
+}
+
+.favorite svg {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translateX(50%) translateY(-50%);
+    width: 20px;
+    aspect-ratio: 1;
+    fill: #fadb14;
+    stroke: orange;
+    stroke-width: 2px;
+    filter: drop-shadow(0 0 2px #0007) drop-shadow(0 0 6px orange);
+}

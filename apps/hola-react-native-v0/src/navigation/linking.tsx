@@ -1,0 +1,40 @@
+import { venuePath } from "./functions/venuePath";
+
+export const linking = {
+    prefixes: ['myapp://'],
+    config: {
+        screens: {
+            CustomerHome: '',
+            CustomerMatches: '/matches',
+            CustomerMatchesSearch: '/matches/search',
+            CustomerMatchesByVenue: venuePath('matches/:venue(@[a-zA-Z0-9_-]+)'),
+            CustomerMatchCreationDate: venuePath('/matches/:venue(@[a-zA-Z0-9_-]+)/create'),
+            CustomerMatchCreationOptions: venuePath('/matches/:venue(@[a-zA-Z0-9_-]+)/create/options'),
+            CustomerMatchCreationCheckout: venuePath('/matches/:venue(@[a-zA-Z0-9_-]+)/create/checkout'),
+            CustomerMatchDetails: '/matches/:match',
+            CustomerMatchRequest: '/matches/:match/request',
+            CustomerShareMatch: '/share/:match',
+            CustomerShareMatchToFriends: '/share/:match/friends',
+            CustomerSharedMatchQRCode: '/share/:match/qrcode',
+            CustomerSharedMatchQRCodeScan: '/share/scan',
+            CustomerSharedInvites: '/share/invites',
+            CustomerProfile: '/profile/:id?',
+            CustomerProfileEdit: '/profile/edit',
+            CustomerSettings: '/settings',
+            CustomerSettingsLanguage: '/settings/language',
+            CustomerSocial: '/social',
+            CustomerSocialMatchChat: '/social/match/:match',
+            CustomerSocialBlockedUsers: '/social/blocked',
+            CustomerAuth: '/auth',
+            CustomerAuthLangugage: '/auth/langage',
+            CustomerAuthLogin: '/auth/login',
+            CustomerAuthForgot: '/auth/forgot',
+            CustomerAuthReset: '/auth/reset/:token',
+            CustomerAuthSignup: '/auth/signup',
+            CustomerAuthLangage: '/auth/signup/langage',
+            CustomerAuthPreferences: '/auth/signup/preferences',
+            CustomerAuthConfidentiality: '/auth/signup/confidentiality',
+            CustomerAuthTutorial: '/auth/signup/tutorial',
+        }
+    },
+};
