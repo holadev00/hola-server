@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+
+.hss-primary {
+    --color: #ff6b2b;
+    --text: #fff;
+}
+
+.hss-secondary {
+    --color: #f7f7f5;
+    --text: #111;
+}
+
+.hss-outline {
+    border-color: var(--color);
+    color: var(--color)
+}
+
+.hss-fill {
+    background-color: var(--color);
+    color: var(--text);
+}
